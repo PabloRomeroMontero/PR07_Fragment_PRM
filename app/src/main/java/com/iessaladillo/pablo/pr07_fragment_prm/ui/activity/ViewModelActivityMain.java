@@ -13,23 +13,25 @@ import androidx.lifecycle.ViewModel;
 public class ViewModelActivityMain extends ViewModel {
     private Database database;
     private Avatar avatar;
-    private User userIntent;
+    private User userVM;
     private LiveData<List<User>> users = null;
+    private boolean idImagen=false;
 
 
     //Creamos todos estos booleans por boton para notificar pulsaciones en el mismo.
-    private MutableLiveData<Boolean> addNewuserButtonListener = new MutableLiveData<>();
+    private MutableLiveData<Boolean> editUserFragmentEvent = new MutableLiveData<>();
+    private MutableLiveData<Boolean> changeAvatarFragmentEvent = new MutableLiveData<>();
 
     public ViewModelActivityMain(Database database) {
         this.database = database;
     }
 
-    public MutableLiveData<Boolean> getAddNewuserButtonListener() {
-        return addNewuserButtonListener;
+    public MutableLiveData<Boolean> getEditUserFragmentEvent() {
+        return editUserFragmentEvent;
     }
 
-    public void setAddNewuserButtonListener(MutableLiveData<Boolean> addNewuserButtonListener) {
-        this.addNewuserButtonListener = addNewuserButtonListener;
+    public void setEditUserFragmentEvent(MutableLiveData<Boolean> editUserFragmentEvent) {
+        this.editUserFragmentEvent = editUserFragmentEvent;
     }
 
     public void addUser(User user) {
@@ -57,33 +59,36 @@ public class ViewModelActivityMain extends ViewModel {
     }
 
     public void addNewUser() {
-        addNewuserButtonListener.postValue(true);
+        editUserFragmentEvent.postValue(true);
     }
 
     public void editUser(User item, int position) {
+        userVM =item;
+        this.editUserFragmentEvent.setValue(false);
+
 
     }
 
+
+    public MutableLiveData<Boolean> getChangeAvatarFragmentEvent() {
+        return changeAvatarFragmentEvent;
+    }
+
+
     /*************************Profile User****************************************/
-
-
-
     public Avatar getAvatar() {
         if (avatar == null) {
             avatar = database.getDefaultAvatar();
         }
-
         return avatar;
     }
-
-    public User getUserIntent() {
-        if(userIntent == null){
-            setUser(new User(database.getDefaultAvatar(),"hola","","",0,""));
+    public User getUserVM() {
+        if(userVM == null){
+            setUserVM(new User(database.getDefaultAvatar(),"hola","","",0,""));
         }
-
-
-        return userIntent;
+        return userVM;
     }
+
 
     public void changeAvatar(long id) {
         if (avatar == null) {
@@ -93,7 +98,30 @@ public class ViewModelActivityMain extends ViewModel {
         }
 
     }
-    public void setUser(User user) {
-        userIntent = user;
+    public void setUserVM(User userVM) {
+        this.userVM = userVM;
     }
+
+    public void deleteUserVM(){
+        userVM =null;
+    }
+    /***************************Change Avatar*********************************/
+
+    public List<Avatar> getCatList(){
+        return database.queryAvatars();
+    }
+
+    public void setAvatar(Avatar avatar) {
+        this.avatar=avatar;
+    }
+
+    public boolean getIdImagen() {
+        return idImagen;
+    }
+
+    public void setIdImagen(boolean idImagen) {
+        this.idImagen = idImagen;
+    }
+
+
 }

@@ -75,5 +75,7 @@ public class ListFragmentAdapter extends ListAdapter<User,ListFragmentAdapter.Vi
         public User getItem(int position) {
             return super.getItem(position);
         }
+
+
     }
 

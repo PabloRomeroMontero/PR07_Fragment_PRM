@@ -8,11 +8,13 @@ import android.content.pm.ResolveInfo;
 import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Parcelable;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
@@ -22,7 +24,6 @@ import android.widget.TextView;
 import com.google.android.material.snackbar.Snackbar;
 import com.iessaladillo.pablo.pr07_fragment_prm.R;
 import com.iessaladillo.pablo.pr07_fragment_prm.data.local.Database;
-import com.iessaladillo.pablo.pr07_fragment_prm.data.local.model.User;
 import com.iessaladillo.pablo.pr07_fragment_prm.databinding.FragmentEditUserBinding;
 import com.iessaladillo.pablo.pr07_fragment_prm.ui.activity.ViewModelActivityMain;
 import com.iessaladillo.pablo.pr07_fragment_prm.ui.activity.ViewModelFactoryActivityMain;
@@ -31,8 +32,9 @@ import com.iessaladillo.pablo.pr07_fragment_prm.utils.ValidationUtils;
 import java.util.List;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.databinding.DataBindingUtil;
-import androidx.databinding.ViewDataBinding;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProviders;
 
@@ -46,8 +48,10 @@ public class EditUserFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savecInstanceState) {
         b = DataBindingUtil.inflate(inflater, R.layout.fragment_edit_user, container, false);
         vm = ViewModelProviders.of(getActivity(), new ViewModelFactoryActivityMain(Database.getInstance())).get(ViewModelActivityMain.class);
+        setHasOptionsMenu(true);
+        setupToolbar();
         initView();
-        return inflater.inflate(R.layout.fragment_edit_user, container, false);
+        return b.getRoot();
     }
 
     private void initView() {
@@ -92,7 +96,8 @@ public class EditUserFragment extends Fragment {
 
         });
         b.imgAvatarMain.setOnClickListener(v -> {
-
+            //Llama al observable del Main activity que inicia el fragmento
+            vm.getChangeAvatarFragmentEvent().setValue(true);
         });
 
 
@@ -135,7 +140,7 @@ public class EditUserFragment extends Fragment {
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                vm.getUserIntent().setWeb(b.include.txtWeb.getText().toString());
+                vm.getUserVM().setWeb(b.include.txtWeb.getText().toString());
                 validateWhitIcon(b.include.txtWeb, b.include.imgWeb, b.include.lblWeb, ValidationUtils.isValidUrl(b.include.txtWeb.getText().toString()));
             }
 
@@ -150,8 +155,7 @@ public class EditUserFragment extends Fragment {
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                vm.getUserIntent().setName(b.include.txtName.getText().toString());
-                b.lblAvatar.setText(vm.getUserIntent().getName());
+                vm.getUserVM().setName(b.include.txtName.getText().toString());
                 validateWhitoutIcon(b.include.txtName, b.include.lblName, !TextUtils.isEmpty(b.include.txtName.getText()));
             }
 
@@ -166,7 +170,7 @@ public class EditUserFragment extends Fragment {
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                vm.getUserIntent().setAddress(b.include.txtAddress.getText().toString());
+                vm.getUserVM().setAddress(b.include.txtAddress.getText().toString());
                 validateWhitIcon(b.include.txtAddress, b.include.imgAddress, b.include.lblAddress, !TextUtils.isEmpty(b.include.txtAddress.getText()));
             }
 
@@ -187,9 +191,9 @@ public class EditUserFragment extends Fragment {
             @Override
             public void afterTextChanged(Editable s) {
                 if (TextUtils.isEmpty(b.include.txtPhonenumber.getText().toString())) {
-                    vm.getUserIntent().setNumber(0);
+                    vm.getUserVM().setNumber(0);
                 } else {
-                    vm.getUserIntent().setNumber(Integer.parseInt(b.include.txtPhonenumber.getText().toString()));
+                    vm.getUserVM().setNumber(Integer.parseInt(b.include.txtPhonenumber.getText().toString()));
                 }
 
             }
@@ -201,7 +205,7 @@ public class EditUserFragment extends Fragment {
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                vm.getUserIntent().setEmail(b.include.txtEmail.getText().toString());
+                vm.getUserVM().setEmail(b.include.txtEmail.getText().toString());
                 validateWhitIcon(b.include.txtEmail, b.include.imgEmail, b.include.lblEmail, ValidationUtils.isValidEmail(b.include.txtEmail.getText().toString()));
             }
 
@@ -218,13 +222,13 @@ public class EditUserFragment extends Fragment {
     }
 
     private void initUser() {
-            b.include.txtName.setText(vm.getUserIntent().getName());
-            b.lblAvatar.setText(vm.getUserIntent().getName());
-            b.include.txtAddress.setText(vm.getUserIntent().getAddress());
-            b.include.txtEmail.setText(vm.getUserIntent().getEmail());
-            b.include.txtWeb.setText(vm.getUserIntent().getWeb());
-            b.include.txtPhonenumber.setText(String.valueOf(vm.getUserIntent().getNumber()));
-            b.imgAvatarMain.setImageResource(vm.getUserIntent().getAvatar().getImageResId());
+            b.include.txtName.setText(vm.getUserVM().getName());
+            b.lblAvatar.setText(vm.getUserVM().getAvatar().getName());
+            b.include.txtAddress.setText(vm.getUserVM().getAddress());
+            b.include.txtEmail.setText(vm.getUserVM().getEmail());
+            b.include.txtWeb.setText(vm.getUserVM().getWeb());
+            b.include.txtPhonenumber.setText(String.valueOf(vm.getUserVM().getNumber()));
+            b.imgAvatarMain.setImageResource(vm.getUserVM().getAvatar().getImageResId());
 
     }
 
@@ -282,8 +286,30 @@ public class EditUserFragment extends Fragment {
     private void save() {
         if (validateAll()) {
             Snackbar.make(b.include.txtWeb, getString(R.string.main_saved_succesfully), LENGTH_SHORT).show();
+            vm.deleteUserVM();
         } else {
             Snackbar.make(b.include.txtWeb, getString(R.string.main_error_saving), LENGTH_SHORT).show();
+        }
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.activity_main, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.mnuSave) {
+            save();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void setupToolbar() {
+        ActionBar actionBar = ((AppCompatActivity) requireActivity()).getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setDisplayHomeAsUpEnabled(true);
         }
     }
 }

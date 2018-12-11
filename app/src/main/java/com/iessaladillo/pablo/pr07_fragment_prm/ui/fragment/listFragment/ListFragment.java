@@ -12,6 +12,8 @@ import com.iessaladillo.pablo.pr07_fragment_prm.databinding.FragmentListBinding;
 import com.iessaladillo.pablo.pr07_fragment_prm.ui.activity.ViewModelFactoryActivityMain;
 import com.iessaladillo.pablo.pr07_fragment_prm.ui.activity.ViewModelActivityMain;
 
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProviders;
@@ -27,6 +29,7 @@ public class ListFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savecInstanceState) {
         b = DataBindingUtil.inflate(inflater, R.layout.fragment_list, container, false);
         vm = ViewModelProviders.of(getActivity(), new ViewModelFactoryActivityMain(Database.getInstance())).get(ViewModelActivityMain.class);
+        setupToolbar();
         setupViews();
         observeUsers();
         return b.getRoot();
@@ -52,18 +55,25 @@ public class ListFragment extends Fragment {
             @Override
             public void onItemClickDelete(int position) {
                 vm.deleteUser(listAdapter.getItem(position));
-                listAdapter.notifyItemRemoved(position);
+               // listAdapter.notifyItemRemoved(position);
             }
 
             @Override
             public void onItemClickEdit(int position) {
                 vm.editUser(listAdapter.getItem(position), position);
-                listAdapter.notifyItemChanged(position);
+               // listAdapter.notifyItemChanged(position);
             }
         });
         b.lstUsers.setHasFixedSize(true);
         b.lstUsers.setLayoutManager(new GridLayoutManager(getContext(), getResources().getInteger(R.integer.main_lstUsers_colums)));
         b.lstUsers.setItemAnimator(new DefaultItemAnimator());
         b.lstUsers.setAdapter(listAdapter);
+    }
+
+    private void setupToolbar() {
+        ActionBar actionBar = ((AppCompatActivity) requireActivity()).getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setDisplayHomeAsUpEnabled(false);
+        }
     }
 }
