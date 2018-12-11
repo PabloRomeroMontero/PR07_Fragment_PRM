@@ -1,5 +1,6 @@
 package com.iessaladillo.pablo.pr07_fragment_prm.ui.activity;
 
+
 import com.iessaladillo.pablo.pr07_fragment_prm.data.local.Database;
 import com.iessaladillo.pablo.pr07_fragment_prm.data.local.model.Avatar;
 import com.iessaladillo.pablo.pr07_fragment_prm.data.local.model.User;
@@ -14,6 +15,7 @@ public class ViewModelActivityMain extends ViewModel {
     private Database database;
     private Avatar avatar;
     private User userVM;
+    private User userToEdit;
     private LiveData<List<User>> users = null;
     private boolean idImagen=false;
 
@@ -21,6 +23,7 @@ public class ViewModelActivityMain extends ViewModel {
     //Creamos todos estos booleans por boton para notificar pulsaciones en el mismo.
     private MutableLiveData<Boolean> editUserFragmentEvent = new MutableLiveData<>();
     private MutableLiveData<Boolean> changeAvatarFragmentEvent = new MutableLiveData<>();
+    private boolean editable = false;
 
     public ViewModelActivityMain(Database database) {
         this.database = database;
@@ -28,10 +31,6 @@ public class ViewModelActivityMain extends ViewModel {
 
     public MutableLiveData<Boolean> getEditUserFragmentEvent() {
         return editUserFragmentEvent;
-    }
-
-    public void setEditUserFragmentEvent(MutableLiveData<Boolean> editUserFragmentEvent) {
-        this.editUserFragmentEvent = editUserFragmentEvent;
     }
 
     public void addUser(User user) {
@@ -42,14 +41,11 @@ public class ViewModelActivityMain extends ViewModel {
         database.deleteUser(user);
     }
 
-    public void editUser(User newUser, User oldUser) {
-        oldUser.setAvatar(newUser.getAvatar());
-        oldUser.setNumber(newUser.getNumber());
-        oldUser.setWeb(newUser.getWeb());
-        oldUser.setName(newUser.getName());
-        oldUser.setAddress(newUser.getAddress());
-        oldUser.setEmail(newUser.getEmail());
+    public void copyUser(User userToEdit) {
+        userVM = new User( userToEdit.getAvatar(),userToEdit.getName(),userToEdit.getEmail(),userToEdit.getAddress(),userToEdit.getNumber(),userToEdit.getWeb());
     }
+
+
 
     public LiveData<List<User>> getUsers(boolean forceLoad) {
         if (users == null || forceLoad)
@@ -58,18 +54,30 @@ public class ViewModelActivityMain extends ViewModel {
 
     }
 
-    public void addNewUser() {
+    public void clickAddNewUser() {
+        setEditable(false);
         editUserFragmentEvent.postValue(true);
     }
 
-    public void editUser(User item, int position) {
-        userVM =item;
-        this.editUserFragmentEvent.setValue(false);
-
-
+    public void setUserToEdit(User userToEdit) {
+        this.userToEdit = userToEdit;
     }
 
+    public void saveUser(User newUser){
+        userToEdit.setAvatar(newUser.getAvatar());
+        userToEdit.setNumber(newUser.getNumber());
+        userToEdit.setWeb(newUser.getWeb());
+        userToEdit.setName(newUser.getName());
+        userToEdit.setAddress(newUser.getAddress());
+        userToEdit.setEmail(newUser.getEmail());
+    }
 
+    public void clickEditUserRV(User user) {
+        setEditable(true);
+        userToEdit =user;
+        copyUser(userToEdit);
+        this.editUserFragmentEvent.setValue(false);
+    }
     public MutableLiveData<Boolean> getChangeAvatarFragmentEvent() {
         return changeAvatarFragmentEvent;
     }
@@ -84,7 +92,7 @@ public class ViewModelActivityMain extends ViewModel {
     }
     public User getUserVM() {
         if(userVM == null){
-            setUserVM(new User(database.getDefaultAvatar(),"hola","","",0,""));
+            setUserVM(new User(database.getDefaultAvatar(),"","","",0,""));
         }
         return userVM;
     }
@@ -98,6 +106,7 @@ public class ViewModelActivityMain extends ViewModel {
         }
 
     }
+
     public void setUserVM(User userVM) {
         this.userVM = userVM;
     }
@@ -111,10 +120,6 @@ public class ViewModelActivityMain extends ViewModel {
         return database.queryAvatars();
     }
 
-    public void setAvatar(Avatar avatar) {
-        this.avatar=avatar;
-    }
-
     public boolean getIdImagen() {
         return idImagen;
     }
@@ -123,5 +128,15 @@ public class ViewModelActivityMain extends ViewModel {
         this.idImagen = idImagen;
     }
 
+    public void setEditable(boolean editable){
+        this.editable=editable;
+    }
 
+    public boolean isEditable() {
+        return editable;
+    }
+
+    public User getUserToEdit() {
+        return userToEdit;
+    }
 }

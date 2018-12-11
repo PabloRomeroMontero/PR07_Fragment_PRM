@@ -77,8 +77,9 @@ public class MainActivity extends AppCompatActivity {
     public void onBackPressed() {
         if (getSupportFragmentManager().findFragmentById(R.id.listFragmentFL).getTag().equals(SelectedAvatarFragment.class.getSimpleName())) {
             vm.setIdImagen(false);
-            super.onBackPressed();
         }
+            super.onBackPressed();
+
     }
 
 

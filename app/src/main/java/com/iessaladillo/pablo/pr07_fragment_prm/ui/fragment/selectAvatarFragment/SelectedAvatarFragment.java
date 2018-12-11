@@ -66,9 +66,8 @@ public class SelectedAvatarFragment extends Fragment {
     }
 
     private void clickAvatar(ImageView imgView, int position){
-        selectImageView(checkImgView(vm.getAvatar()),imgView);
-        vm.changeAvatar(listCat.get(position).getImageResId());
-
+        selectImageView(checkImgView(vm.getAvatar()),imgView);;
+        vm.changeAvatar(listCat.get(position).getId());
     }
 
     private void selectImageView(ImageView imageViewOld,ImageView imageViewNew) {

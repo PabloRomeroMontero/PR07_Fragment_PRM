@@ -45,8 +45,8 @@ public class ListFragment extends Fragment {
 
     private void setupViews() {
         setupRecyclerView();
-        b.fab.setOnClickListener(v -> vm.addNewUser());
-        b.noUsers.setOnClickListener(v -> vm.addNewUser());
+        b.fab.setOnClickListener(v -> vm.clickAddNewUser());
+        b.noUsers.setOnClickListener(v -> vm.clickAddNewUser());
     }
 
     private void setupRecyclerView() {
@@ -55,13 +55,11 @@ public class ListFragment extends Fragment {
             @Override
             public void onItemClickDelete(int position) {
                 vm.deleteUser(listAdapter.getItem(position));
-               // listAdapter.notifyItemRemoved(position);
             }
 
             @Override
             public void onItemClickEdit(int position) {
-                vm.editUser(listAdapter.getItem(position), position);
-               // listAdapter.notifyItemChanged(position);
+                vm.clickEditUserRV(listAdapter.getItem(position));
             }
         });
         b.lstUsers.setHasFixedSize(true);

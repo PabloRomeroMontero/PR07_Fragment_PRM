@@ -17,6 +17,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -48,6 +49,8 @@ public class EditUserFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savecInstanceState) {
         b = DataBindingUtil.inflate(inflater, R.layout.fragment_edit_user, container, false);
         vm = ViewModelProviders.of(getActivity(), new ViewModelFactoryActivityMain(Database.getInstance())).get(ViewModelActivityMain.class);
+        //Metodo ventana
+        getActivity().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
         setHasOptionsMenu(true);
         setupToolbar();
         initView();
@@ -286,7 +289,13 @@ public class EditUserFragment extends Fragment {
     private void save() {
         if (validateAll()) {
             Snackbar.make(b.include.txtWeb, getString(R.string.main_saved_succesfully), LENGTH_SHORT).show();
+            if(!vm.isEditable()) {
+                vm.addUser(vm.getUserVM());
+            }else{
+               vm.saveUser(vm.getUserVM());
+            }
             vm.deleteUserVM();
+            getActivity().onBackPressed();
         } else {
             Snackbar.make(b.include.txtWeb, getString(R.string.main_error_saving), LENGTH_SHORT).show();
         }
